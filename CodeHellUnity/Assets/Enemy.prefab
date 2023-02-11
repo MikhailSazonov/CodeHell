@@ -49,6 +49,8 @@ MonoBehaviour:
   damage: 5
   maxHP: 30
   currentHP: 20
+  heal: 30
+  damageBonus: 0
 --- !u!1 &5492376629917588543
 GameObject:
   m_ObjectHideFlags: 0
@@ -94,6 +96,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

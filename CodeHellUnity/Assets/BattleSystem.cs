@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public enum BattleState { START, PLAYERTURN, ENEMYTURN, WON, LOST }
 
 public class BattleSystem : MonoBehaviour
@@ -17,6 +18,8 @@ public class BattleSystem : MonoBehaviour
 	Unit playerUnit;
 	Unit enemyUnit;
 
+	int turn;
+
 	public Text dialogueText;
 
 	public BattleHUD playerHUD;
@@ -27,6 +30,7 @@ public class BattleSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+		turn = 0;
 		state = BattleState.START;
 		StartCoroutine(SetupBattle());
     }
@@ -52,9 +56,10 @@ public class BattleSystem : MonoBehaviour
 
 	IEnumerator PlayerAttack()
 	{
-		bool isDead = enemyUnit.TakeDamage(playerUnit.damage);
+		bool isDead = enemyUnit.TakeDamage(playerUnit.damage + playerUnit.damageBonus);
 
 		enemyHUD.SetHP(enemyUnit.currentHP);
+
 		dialogueText.text = "The attack is successful!";
 
 		yield return new WaitForSeconds(2f);
@@ -72,6 +77,7 @@ public class BattleSystem : MonoBehaviour
 
 	IEnumerator EnemyTurn()
 	{
+
 		dialogueText.text = enemyUnit.unitName + " attacks!";
 
 		yield return new WaitForSeconds(1f);
@@ -107,15 +113,30 @@ public class BattleSystem : MonoBehaviour
 
 	void PlayerTurn()
 	{
+		playerUnit.InitTurn();
+
 		dialogueText.text = "Choose an action:";
 	}
 
 	IEnumerator PlayerHeal()
 	{
-		playerUnit.Heal(5);
+		playerUnit.Heal();
 
 		playerHUD.SetHP(playerUnit.currentHP);
 		dialogueText.text = "You feel renewed strength!";
+
+		yield return new WaitForSeconds(2f);
+
+		state = BattleState.ENEMYTURN;
+		StartCoroutine(EnemyTurn());
+	}
+
+	IEnumerator PlayerDrinkCoffee()
+	{
+		playerUnit.DrinkCoffee();
+
+		// TODO: create HUD
+		dialogueText.text = "You have gained burst of energy!";
 
 		yield return new WaitForSeconds(2f);
 
@@ -127,7 +148,6 @@ public class BattleSystem : MonoBehaviour
 	{
 		if (state != BattleState.PLAYERTURN)
 			return;
-
 		StartCoroutine(PlayerAttack());
 	}
 
@@ -135,8 +155,13 @@ public class BattleSystem : MonoBehaviour
 	{
 		if (state != BattleState.PLAYERTURN)
 			return;
-
 		StartCoroutine(PlayerHeal());
 	}
 
+	public void OnDrinkCoffeeButton()
+	{
+		if (state != BattleState.PLAYERTURN)
+			return;
+		StartCoroutine(PlayerDrinkCoffee());
+	}
 }
