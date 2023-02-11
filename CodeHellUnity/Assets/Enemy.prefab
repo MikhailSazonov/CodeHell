@@ -47,13 +47,10 @@ MonoBehaviour:
   unitName: The Rock
   unitLevel: 2
   damage: 5
-  maxHP: 1000
-  currentHP: 1000
+  maxHP: 30
+  currentHP: 20
   heal: 30
   damageBonus: 0
-  accuracyBonus: 0
-  chanceRepeat: 0
-  chanceCritical: 25
 --- !u!1 &5492376629917588543
 GameObject:
   m_ObjectHideFlags: 0
