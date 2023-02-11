@@ -54,22 +54,33 @@ public class BattleSystem : MonoBehaviour
 		PlayerTurn();
 	}
 
+	private delegate IEnumerator Action();
+
 	IEnumerator PlayerAttack()
 	{
-		bool isDead = enemyUnit.TakeDamage(playerUnit.damage + playerUnit.damageBonus);
+		string text = "";
+
+		int dmg = playerUnit.getDamage();
+		if (dmg > playerUnit.damage + playerUnit.damageBonus) {
+			text += "CRITICAL STRIKE! ";
+		}
+
+		bool isDead = enemyUnit.TakeDamage(dmg);
 
 		enemyHUD.SetHP(enemyUnit.currentHP);
 
-		dialogueText.text = "The attack is successful!";
+		text += playerUnit.unitName + " attacks!";
+
+		dialogueText.text = text;
 
 		yield return new WaitForSeconds(2f);
 
-		if(isDead)
-		{
+		if (isDead) {
 			state = BattleState.WON;
 			EndBattle();
-		} else
-		{
+		} else if (playerUnit.TakeChance()) {
+			dialogueText.text = "Strike twice!";
+		} else {
 			state = BattleState.ENEMYTURN;
 			StartCoroutine(EnemyTurn());
 		}
@@ -77,18 +88,25 @@ public class BattleSystem : MonoBehaviour
 
 	IEnumerator EnemyTurn()
 	{
-
-		dialogueText.text = enemyUnit.unitName + " attacks!";
+		string text = "";
+		int dmg = enemyUnit.getDamage();
+		if (dmg > enemyUnit.damage + enemyUnit.damageBonus) {
+			text += "CRITICAL STRIKE! ";
+		}
 
 		yield return new WaitForSeconds(1f);
 
-		bool isDead = playerUnit.TakeDamage(enemyUnit.damage);
+		bool isDead = playerUnit.TakeDamage(dmg);
 
 		playerHUD.SetHP(playerUnit.currentHP);
 
+		text += enemyUnit.unitName + " attacks!";
+
+		dialogueText.text = text;
+
 		yield return new WaitForSeconds(1f);
 
-		if(isDead)
+		if (isDead)
 		{
 			state = BattleState.LOST;
 			EndBattle();
@@ -127,16 +145,37 @@ public class BattleSystem : MonoBehaviour
 
 		yield return new WaitForSeconds(2f);
 
-		state = BattleState.ENEMYTURN;
-		StartCoroutine(EnemyTurn());
+		if (playerUnit.TakeChance()) {
+			dialogueText.text = "Strike twice!";
+		} else {
+			state = BattleState.ENEMYTURN;
+			StartCoroutine(EnemyTurn());
+		}
 	}
 
 	IEnumerator PlayerDrinkCoffee()
 	{
-		playerUnit.DrinkCoffee();
+		playerUnit.Drink<CoffeeBuff>();
 
 		// TODO: create HUD
-		dialogueText.text = "You have gained burst of energy!";
+		dialogueText.text = "Now your attacks are powerful!";
+
+		yield return new WaitForSeconds(2f);
+
+		if (playerUnit.TakeChance()) {
+			dialogueText.text = "Strike twice!";
+		} else {
+			state = BattleState.ENEMYTURN;
+			StartCoroutine(EnemyTurn());
+		}
+	}
+
+	IEnumerator PlayerDrinkRedBull()
+	{
+		playerUnit.Drink<RedBullBuff>();
+
+		// TODO: create HUD
+		dialogueText.text = "You are feeling burst of energy!";
 
 		yield return new WaitForSeconds(2f);
 
@@ -144,24 +183,30 @@ public class BattleSystem : MonoBehaviour
 		StartCoroutine(EnemyTurn());
 	}
 
-	public void OnAttackButton()
+	private void CallWithCheck(Action func)
 	{
 		if (state != BattleState.PLAYERTURN)
 			return;
-		StartCoroutine(PlayerAttack());
+		StartCoroutine(func());
+	}
+
+	public void OnAttackButton()
+	{
+		CallWithCheck(PlayerAttack);
 	}
 
 	public void OnHealButton()
 	{
-		if (state != BattleState.PLAYERTURN)
-			return;
-		StartCoroutine(PlayerHeal());
+		CallWithCheck(PlayerHeal);
 	}
 
 	public void OnDrinkCoffeeButton()
 	{
-		if (state != BattleState.PLAYERTURN)
-			return;
-		StartCoroutine(PlayerDrinkCoffee());
+		CallWithCheck(PlayerDrinkCoffee);
+	}
+
+	public void OnDrinkRedBullButton()
+	{
+		CallWithCheck(PlayerDrinkRedBull);
 	}
 }

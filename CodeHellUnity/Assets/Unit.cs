@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Unit : MonoBehaviour
 {
@@ -16,11 +17,16 @@ public class Unit : MonoBehaviour
 	public int heal;
 
 	public int damageBonus;
+	public int accuracyBonus;
+	
+	public int chanceRepeat;
+	public int chanceCritical;
 
 	List<BuffBase> buffs;
 
 	public Unit() {
     	buffs = new List<BuffBase>();
+		currentHP = maxHP;
 	}
 
 	private void useBuffs() {
@@ -38,18 +44,35 @@ public class Unit : MonoBehaviour
 
 	public void InitTurn()
 	{
+		chanceRepeat = 0;
 		damageBonus = 0;
 		useBuffs();
+	}
+
+	public int getDamage()
+	{
+		if (Roll.luckyMe(chanceCritical)) {
+			return 2 * (damage + damageBonus);
+		}
+		return damage + damageBonus; 
 	}
 
 	public bool TakeDamage(int dmg)
 	{
 		currentHP -= dmg;
-
 		if (currentHP <= 0)
 			return true;
 		else
 			return false;
+	}
+
+	public bool TakeChance()
+	{
+		if (Roll.luckyMe(chanceRepeat)) {
+			chanceRepeat = 0;
+			return true;
+		}
+		return false;
 	}
 
 	public void Heal()
@@ -59,9 +82,8 @@ public class Unit : MonoBehaviour
 			currentHP = maxHP;
 	}
 
-	public void DrinkCoffee()
+	public void Drink<T>() where T : BuffBase, new()
 	{
-		buffs.Add(new CoffeeBuff());
+		buffs.Add(new T());
 	}
-
 }
