@@ -6,6 +6,8 @@ public class GG : Unit
 {
 	public int heal;
 
+	public bool twice;
+
 	List<BuffBase> buffs;
 
 	public void StartBattle() {
@@ -13,6 +15,7 @@ public class GG : Unit
 		buffs.Add(GameObject.FindWithTag("coffee").GetComponent(typeof(CoffeeBuff)) as CoffeeBuff);
 		buffs.Add(GameObject.FindWithTag("redbull").GetComponent(typeof(RedBullBuff)) as RedBullBuff);
 		currentHP = maxHP;
+		twice = false;
 	}
 
 	private void useBuffs() {
@@ -31,6 +34,7 @@ public class GG : Unit
 	public bool TakeChance()
 	{
 		if (Roll.luckyMe(chanceRepeat)) {
+			Debug.Log("HUI");
 			chanceRepeat = 0;
 			return true;
 		}
@@ -42,6 +46,7 @@ public class GG : Unit
         text += unitName + " attacks.";
         thisObject.GetComponent<Animator>().SetTrigger("onAttack");
         target.TakeDamage(dmg);
+		twice = TakeChance();
     }
 
 	public void Heal(ref string text)
@@ -50,7 +55,7 @@ public class GG : Unit
 		if (currentHP > maxHP)
 			currentHP = maxHP;
         text += "You feel renewed strength!";
-        Debug.Log(text);
+		twice = TakeChance();
 	}
 
 	public void Sleep(ref string text)
@@ -65,6 +70,7 @@ public class GG : Unit
 			if (drink.buffName == text) {
                 if (text == "coffee") {
                     text = "Your strikes become more accurate!";
+					twice = TakeChance();
                 }
                 if (text == "energy") {
                     text = "You are feeling burst of energy!";

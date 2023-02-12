@@ -81,7 +81,15 @@ public class BattleSystem : MonoBehaviour
 			yield return new WaitForSeconds(2f);
 
 			if (state == BattleState.ENEMYTURN) {
-				EnemyTurn();
+				if (playerUnit.twice) {
+					dialogueText.text = "You can strike twice!";
+					state = BattleState.PLAYERTURN;
+					yield return new WaitForSeconds(2f);
+					playerUnit.twice = false;
+					PlayerTurn();
+				} else {
+					EnemyTurn();
+				}
 			} else {
 				PlayerTurn();
 			}
