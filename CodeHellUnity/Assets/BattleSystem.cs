@@ -71,7 +71,7 @@ public class BattleSystem : MonoBehaviour
 			state = BattleState.WON;
 			EndBattle();
 			yield return new WaitForSeconds(5f);
-			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
 		} else if (playerUnit.isDead()) {
 			state = BattleState.LOST;
 			EndBattle();
