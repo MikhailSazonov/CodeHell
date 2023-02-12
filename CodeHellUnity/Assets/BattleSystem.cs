@@ -4,18 +4,21 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public enum BattleState { START, PLAYERTURN, ENEMYTURN, WON, LOST }
+public enum BattleState { START, PLAYERTURN = 1, ENEMYTURN = 2, WON, LOST }
 
 public class BattleSystem : MonoBehaviour
 {
-
 	public GameObject playerPrefab;
 	public GameObject enemyPrefab;
+	public GameObject button;
+
+	public GameObject playerObj;
+	public GameObject enemyObj;
 
 	public Transform playerBattleStation;
 	public Transform enemyBattleStation;
 
-	Unit playerUnit;
+	GG playerUnit;
 	Unit enemyUnit;
 
 	int turn;
@@ -24,6 +27,8 @@ public class BattleSystem : MonoBehaviour
 
 	public BattleHUD playerHUD;
 	public BattleHUD enemyHUD;
+
+	private delegate void Action(ref string text);
 
 	public BattleState state;
 
@@ -37,11 +42,11 @@ public class BattleSystem : MonoBehaviour
 
 	IEnumerator SetupBattle()
 	{
-		GameObject playerGO = Instantiate(playerPrefab, playerBattleStation);
-		playerUnit = playerGO.GetComponent<Unit>();
+		playerObj = Instantiate(playerPrefab, playerBattleStation);
+		playerUnit = playerObj.GetComponent<GG>();
 
-		GameObject enemyGO = Instantiate(enemyPrefab, enemyBattleStation);
-		enemyUnit = enemyGO.GetComponent<Unit>();
+		enemyObj = Instantiate(enemyPrefab, enemyBattleStation);
+		enemyUnit = enemyObj.GetComponent<Unit>();
 
 		dialogueText.text = "A wild " + enemyUnit.unitName + " approaches...";
 
@@ -54,59 +59,56 @@ public class BattleSystem : MonoBehaviour
 		PlayerTurn();
 	}
 
-	IEnumerator PlayerAttack()
-	{
-		bool isDead = enemyUnit.TakeDamage(playerUnit.damage + playerUnit.damageBonus);
-
-		enemyHUD.SetHP(enemyUnit.currentHP);
-
-		dialogueText.text = "The attack is successful!";
-
-		yield return new WaitForSeconds(2f);
-
-		if(isDead)
-		{
-			state = BattleState.WON;
-			EndBattle();
-		} else
-		{
-			state = BattleState.ENEMYTURN;
-			StartCoroutine(EnemyTurn());
-		}
-	}
-
-	IEnumerator EnemyTurn()
-	{
-
-		dialogueText.text = enemyUnit.unitName + " attacks!";
-
-		yield return new WaitForSeconds(1f);
-
-		bool isDead = playerUnit.TakeDamage(enemyUnit.damage);
+	private IEnumerator ChangeTurn(string text) {
+		state = (BattleState)(3 - (int)state);
 
 		playerHUD.SetHP(playerUnit.currentHP);
 
-		yield return new WaitForSeconds(1f);
+		enemyHUD.SetHP(enemyUnit.currentHP);
 
-		if(isDead)
-		{
+		if (enemyUnit.isDead()) {
+			state = BattleState.WON;
+			EndBattle();
+			yield return new WaitForSeconds(1f);
+		} else if (playerUnit.isDead()) {
 			state = BattleState.LOST;
 			EndBattle();
-		} else
-		{
-			state = BattleState.PLAYERTURN;
-			PlayerTurn();
-		}
+			yield return new WaitForSeconds(1f);
+		} else {
+			dialogueText.text = text;
 
+			yield return new WaitForSeconds(2f);
+
+			if (state == BattleState.ENEMYTURN) {
+				EnemyTurn();
+			} else {
+				PlayerTurn();
+			}
+		}
+	}
+
+	void PlayerAttack(ref string text)
+	{
+		playerUnit.Attack(playerObj, enemyUnit, ref text);
+	}
+
+	void EnemyAttack(ref string text)
+	{	
+		Debug.Log("EnemyAttack");
+
+		enemyUnit.Attack(enemyObj, playerUnit, ref text);
+
+		StartCoroutine(ChangeTurn(text));
 	}
 
 	void EndBattle()
 	{
-		if(state == BattleState.WON)
+		if (state == BattleState.WON)
 		{
 			dialogueText.text = "You won the battle!";
 		} else if (state == BattleState.LOST)
 		{
+			playerObj.GetComponent<Animator>().SetTrigger("onDie");
 			dialogueText.text = "You were defeated.";
 		}
 	}
@@ -118,50 +120,50 @@ public class BattleSystem : MonoBehaviour
 		dialogueText.text = "Choose an action:";
 	}
 
-	IEnumerator PlayerHeal()
+	void EnemyTurn()
 	{
-		playerUnit.Heal();
+		enemyUnit.InitTurn();
 
-		playerHUD.SetHP(playerUnit.currentHP);
-		dialogueText.text = "You feel renewed strength!";
+		string text = "";
 
-		yield return new WaitForSeconds(2f);
-
-		state = BattleState.ENEMYTURN;
-		StartCoroutine(EnemyTurn());
+		EnemyAttack(ref text);
 	}
 
-	IEnumerator PlayerDrinkCoffee()
+	private void CallWithCheck(ref string text, Action func)
 	{
-		playerUnit.DrinkCoffee();
-
-		// TODO: create HUD
-		dialogueText.text = "You have gained burst of energy!";
-
-		yield return new WaitForSeconds(2f);
-
-		state = BattleState.ENEMYTURN;
-		StartCoroutine(EnemyTurn());
+		if (state != BattleState.PLAYERTURN)
+			return;
+		func(ref text);
+		StartCoroutine(ChangeTurn(text));
 	}
 
 	public void OnAttackButton()
 	{
-		if (state != BattleState.PLAYERTURN)
-			return;
-		StartCoroutine(PlayerAttack());
+		string text = "";
+		CallWithCheck(ref text, PlayerAttack);
 	}
 
 	public void OnHealButton()
 	{
-		if (state != BattleState.PLAYERTURN)
-			return;
-		StartCoroutine(PlayerHeal());
+		string text = "";
+		CallWithCheck(ref text, playerUnit.Heal);
 	}
 
 	public void OnDrinkCoffeeButton()
 	{
-		if (state != BattleState.PLAYERTURN)
-			return;
-		StartCoroutine(PlayerDrinkCoffee());
+		string text = "coffee";
+		CallWithCheck(ref text, playerUnit.Drink);
+	}
+
+	public void OnDrinkRedBullButton()
+	{
+		string text = "energy";
+		CallWithCheck(ref text, playerUnit.Drink);
+	}
+
+	public void OnSleepButton()
+	{
+		string text = "";
+		CallWithCheck(ref text, playerUnit.Sleep);
 	}
 }

@@ -1,10 +1,13 @@
 ﻿public class CoffeeBuff : BuffBase
 {
+    public int coef = 2;
+
     public CoffeeBuff() {
-        duration = 3;
+        totalDuration = 8;
+        buffName = "coffee";
     }
 
     public override void makeEffect(Unit unit) {
-        unit.damageBonus += 100;
+        unit.chanceCritical *= coef;
     }
 }

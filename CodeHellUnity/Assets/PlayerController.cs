@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour
 
     Rigidbody2D rb;
 
-    Animator animator;
+    public Animator animator;
 
     List<RaycastHit2D> castCollisions = new List<RaycastHit2D>();
 

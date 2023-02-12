@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 553262837322330012}
   - component: {fileID: 3891220200928013580}
   - component: {fileID: -8958829292654974019}
+  - component: {fileID: -6231386199400295810}
   m_Layer: 0
   m_Name: Demon-XELA
   m_TagString: Untagged
@@ -26,12 +27,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4179699536423461274}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.609, y: 0.032, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 1, y: 4, z: 0}
+  m_LocalScale: {x: 7, y: 7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3891220200928013580
 SpriteRenderer:
@@ -105,3 +106,27 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &-6231386199400295810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4179699536423461274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3907ec9474864f3458e5f1c498b0f6a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitName: Xela
+  unitLevel: 100
+  damage: 15
+  maxHP: 500
+  currentHP: 500
+  chanceCritical: 10
+  chanceRepeat: 0
+  percentDamageTaken: 100
+  specialDamage: 35
+  LowBarrierSpecial: 3
+  HighBarrierSpecial: 5
+  timeForAttack: 0
