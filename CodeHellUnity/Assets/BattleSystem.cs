@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using UnityEngine.SceneManagement;
 
 public enum BattleState { START, PLAYERTURN = 1, ENEMYTURN = 2, WON, LOST }
 
@@ -70,11 +70,13 @@ public class BattleSystem : MonoBehaviour
 		if (enemyUnit.isDead()) {
 			state = BattleState.WON;
 			EndBattle();
-			yield return new WaitForSeconds(1f);
+			yield return new WaitForSeconds(5f);
+			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
 		} else if (playerUnit.isDead()) {
 			state = BattleState.LOST;
 			EndBattle();
-			yield return new WaitForSeconds(1f);
+			yield return new WaitForSeconds(5f);
+			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
 		} else {
 			dialogueText.text = text;
 
