@@ -52,6 +52,7 @@ public class BattleSystem : MonoBehaviour
 
 		playerHUD.SetHUD(playerUnit);
 		enemyHUD.SetHUD(enemyUnit);
+		playerUnit.StartBattle();
 
 		yield return new WaitForSeconds(2f);
 

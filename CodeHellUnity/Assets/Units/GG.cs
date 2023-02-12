@@ -8,7 +8,7 @@ public class GG : Unit
 
 	List<BuffBase> buffs;
 
-	void Start() {
+	public void StartBattle() {
     	buffs = new List<BuffBase>();
 		buffs.Add(GameObject.FindWithTag("coffee").GetComponent(typeof(CoffeeBuff)) as CoffeeBuff);
 		buffs.Add(GameObject.FindWithTag("redbull").GetComponent(typeof(RedBullBuff)) as RedBullBuff);
